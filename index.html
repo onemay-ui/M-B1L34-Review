@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#DFF3FF">
+<title>輪機科 B1 L3+L4 單字句子大冒險</title>
+<style>
+:root{
+  --ink:#2B2B3A; --sub:#6B6F85; --bg:#DFF3FF; --card:#fff;
+  --yellow:#FFD23F; --pink:#FF8FB1; --mint:#7BE0B0; --blue:#6FA8FF; --purple:#A58BFF; --red:#FF6B6B; --green:#2DBE7E;
+  --en:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --zh:"PingFang TC","Noto Sans TC","Microsoft JhengHei","Heiti TC",sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;color:var(--ink);font-family:var(--zh);font-size:17px;line-height:1.45;
+  background-color:var(--bg);background-image:radial-gradient(#fff 2.2px,transparent 2.2px);background-size:26px 26px}
+[lang="en"]{font-family:var(--en)}
+[lang="zh-Hant"]{font-family:var(--zh)}
+button,input{font:inherit;color:inherit}
+button{border:0;cursor:pointer;touch-action:manipulation}
+#app{max-width:480px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;
+  padding:max(10px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))}
+.screen{display:none;flex:1;min-height:0;flex-direction:column}
+.screen.on{display:flex}
+.card{background:var(--card);border:3px solid var(--ink);border-radius:22px;padding:14px 16px;box-shadow:0 5px 0 var(--ink)}
+.btn{min-height:56px;border-radius:18px;border:3px solid var(--ink);background:var(--yellow);font-weight:900;font-size:19px;box-shadow:0 5px 0 var(--ink);padding:0 18px;transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+.btn.sec{background:#fff}
+.btn.go{background:var(--green);color:#fff}
+.btn.pulse{animation:pulse 1.2s infinite}
+.btn[disabled]{opacity:.5}
+.link{background:none;min-height:44px;color:var(--sub);font-size:15px;text-decoration:underline}
+
+/* mascot */
+.mas{width:64px;height:64px;flex:none}
+.mas svg{width:100%;height:100%;overflow:visible}
+.mas.idle{animation:bob 2.4s ease-in-out infinite}
+.mas.happy{animation:bounce .6s}
+.mas.oops{animation:wobble .6s}
+
+/* REG */
+#reg{justify-content:center;gap:12px;overflow-y:auto}
+#reg>*{flex-shrink:0}
+#reg h1{margin:0;text-align:center;font-size:clamp(24px,7vw,30px);line-height:1.2}
+#reg .mas{width:96px;height:96px;margin:0 auto}
+.field{display:flex;flex-direction:column;gap:4px;font-weight:800;font-size:15px}
+.field input{width:100%;min-width:0;min-height:52px;border:3px solid var(--ink);border-radius:16px;padding:0 14px;font-size:18px;background:#fff;font-weight:700}
+.field input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 4px #BBD6FF}
+.row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:10px}
+#regerr{color:#D7263D;font-weight:800;min-height:24px;text-align:center;font-size:15px}
+
+/* HOME */
+#home{gap:10px;overflow-y:auto;overflow-x:hidden;padding:2px 6px}
+.hhead{display:flex;align-items:center;gap:10px}
+.hhead .hi{flex:1;min-width:0}
+.hhead .hi b{display:block;font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hhead .hi small{color:var(--sub);font-size:15px}
+.badge{background:#fff;border:3px solid var(--ink);border-radius:16px;padding:4px 10px;font-weight:900;white-space:nowrap;box-shadow:0 3px 0 var(--ink);min-height:44px;display:flex;align-items:center}
+.guess{font-size:15px;font-weight:800;text-align:center}
+.chips{display:flex;gap:8px;justify-content:center;margin-top:6px}
+.chip{min-height:44px;min-width:60px;padding:0 12px;border-radius:22px;background:#fff;border:3px solid var(--ink);font-weight:900}
+.chip.on{background:var(--ink);color:#fff}
+.lv{display:flex;align-items:center;gap:12px;text-align:left;min-height:84px;border-radius:22px;border:3px solid var(--ink);box-shadow:0 5px 0 var(--ink);padding:10px 14px;width:100%;transition:transform .08s,box-shadow .08s}
+.lv:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+.lv .e{font-size:36px}
+.lv .t{flex:1;min-width:0}
+.lv .t b{display:block;font-size:20px}
+.lv .t small{font-size:15px;color:#454860}
+.lv .s{font-size:18px;letter-spacing:1px;white-space:nowrap}
+.hbot{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hbot .btn{font-size:17px;min-height:52px}
+.tgl{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap}
+.tgl button{min-height:44px;border-radius:14px;background:#fff;border:3px solid var(--ink);padding:0 12px;font-weight:800;font-size:15px}
+.tgl button.off{opacity:.45}
+
+/* GAME */
+#hud{display:flex;align-items:center;gap:8px}
+#quit{min-width:44px;min-height:44px;border-radius:14px;background:#fff;border:3px solid var(--ink);font-weight:900}
+#quit.arm{background:var(--red);color:#fff}
+#lvname{flex:1;font-weight:900;font-size:16px;padding:6px 10px;border-radius:14px;border:3px solid var(--ink);background:var(--yellow);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{font-weight:900;font-size:16px;padding:6px 10px;border-radius:14px;border:3px solid var(--ink);background:#fff;white-space:nowrap;min-height:44px;display:flex;align-items:center}
+#pips{display:flex;gap:5px;margin:8px 0 2px}
+#pips i{flex:1;height:12px;border-radius:6px;background:#fff;border:2.5px solid var(--ink)}
+#pips i.cur{background:var(--yellow);animation:pulse 1s infinite}
+#pips i.ok{background:var(--green)}
+#pips i.bad{background:#FFB07A}
+#mrow{display:flex;align-items:center;gap:8px;min-height:68px}
+#bubble{flex:1;min-height:52px;background:#fff;border:3px solid var(--ink);border-radius:18px;padding:6px 12px;font-weight:800;font-size:16px;display:flex;align-items:center;position:relative;opacity:0;transform:scale(.9);transition:all .2s}
+#bubble.on{opacity:1;transform:scale(1)}
+#bubble:before{content:"";position:absolute;left:-11px;top:50%;margin-top:-8px;border:8px solid transparent;border-right:9px solid var(--ink);border-left:0}
+#bubble b{margin-right:6px}
+#stage{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:12px;position:relative;padding:4px 2px 8px}
+.tag{font-size:15px;font-weight:900;color:#3F6FE0}
+.sent{font-size:clamp(20px,5.8vw,25px);line-height:1.55;font-weight:700;margin-top:6px}
+.blank{display:inline-block;margin:0 .18em;min-width:3.2em;border-bottom:4px solid var(--pink);text-align:center;font-weight:900;color:#D6336C}
+.blank.fill{color:var(--green);border-color:var(--green);animation:pop .35s}
+.zh{margin-top:8px;font-size:16px;color:var(--sub);min-height:24px}
+.zh b{color:var(--ink)}
+.opts{display:grid;gap:10px}
+.opt{min-height:58px;border-radius:18px;background:#fff;border:3px solid var(--ink);font-size:clamp(19px,5.4vw,23px);font-weight:800;font-family:var(--en);box-shadow:0 4px 0 var(--ink)}
+.opt:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.opt.ok{background:#CFF5E3}
+.opt.no{background:#FFD9D9;animation:shake .35s}
+.opt[disabled]{cursor:default}
+.word{display:flex;flex-wrap:nowrap;justify-content:center;align-items:flex-end;gap:2px;margin:10px 0 4px;font-family:var(--en);font-size:42px;white-space:nowrap;overflow:hidden}
+.word .c{font-size:1em;font-weight:900;letter-spacing:1px}
+.word .slot{min-width:1.1em;padding:0 .12em;border-bottom:5px solid #C9CDE0;font-size:1em;font-weight:900;text-align:center;color:var(--green);min-height:1.3em}
+.word .slot.act{border-color:var(--pink);animation:blink 1s infinite}
+.word .slot.done{border-color:var(--green);animation:pop .3s}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.built{min-height:88px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;font-size:clamp(18px,5vw,22px);font-weight:700}
+.built span{background:#DDE8FF;border:2.5px solid var(--ink);border-radius:12px;padding:4px 10px;animation:pop .25s}
+.bank{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.chunk{min-height:52px;padding:0 14px;border-radius:16px;background:#fff;border:3px solid var(--ink);font-size:clamp(17px,4.8vw,21px);font-weight:800;font-family:var(--en);box-shadow:0 4px 0 var(--ink)}
+.chunk:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.chunk.used{visibility:hidden}
+.chunk.no{animation:shake .35s;background:#FFD9D9}
+.chunk.hint{background:#FFE9A6}
+#foot{display:flex;gap:8px;align-items:center;padding-top:6px}
+#fbtns{display:flex;gap:8px}
+.sq{min-width:54px;min-height:54px;border-radius:16px;background:#fff;border:3px solid var(--ink);font-size:22px;box-shadow:0 4px 0 var(--ink)}
+.sq.txt{font-size:16px;font-weight:900;padding:0 12px}
+.sq:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+#next{flex:1;visibility:hidden;background:var(--green);color:#fff}
+#next.on{visibility:visible}
+.plus{position:fixed;font-weight:900;font-size:22px;color:#E59500;pointer-events:none;animation:rise 1s ease-out forwards;z-index:30;text-shadow:0 2px 0 #fff}
+#fx{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:40}
+.bp{position:absolute;left:50%;top:38%;font-size:26px;animation:bp 1s ease-out forwards}
+
+/* RESULT / REPORT */
+#result,#report{gap:12px;overflow-y:auto;overflow-x:hidden;padding:2px 6px 6px}
+#result>*,#report>*,#home>*{flex-shrink:0}
+.rtop{display:flex;align-items:center;gap:10px;justify-content:center}
+.rtop h2{margin:0;font-size:26px}
+.stars{font-size:40px;letter-spacing:4px;text-align:center}
+.tmsg{background:#FFF3B8;border:3px solid var(--ink);border-radius:18px;padding:10px 14px;font-weight:800;text-align:center}
+.rcard{background:#fff;border:3px solid var(--ink);border-radius:22px;box-shadow:0 5px 0 var(--ink);overflow:hidden}
+.rcard h3{margin:0;background:var(--ink);color:#fff;padding:8px 14px;font-size:17px}
+.rcard .rows{padding:8px 14px 12px}
+.rr{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:2px dashed #E2E4EE;font-size:16px}
+.rr:last-child{border-bottom:0}
+.rr span{color:var(--sub)}
+.rr b{text-align:right}
+.sec-t{font-weight:900;font-size:15px;color:#3F6FE0;margin-top:6px}
+.code{font-family:var(--en);letter-spacing:2px}
+.weak{font-size:15px;text-align:left;margin-top:6px;color:var(--ink)}
+.weak .en{font-family:var(--en);font-weight:800}
+
+/* DEX */
+#dex{gap:8px}
+.dtop{display:flex;align-items:center;gap:8px}
+.dtop h2{flex:1;margin:0;font-size:20px}
+#dgrid{flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:2px 2px 10px;align-content:start}
+.dc{position:relative;display:flex;flex-direction:column;align-items:center;background:#fff;border:3px solid var(--ink);border-radius:18px;box-shadow:0 4px 0 var(--ink);padding:6px 4px 8px;min-height:128px;transition:transform .08s}
+.dc:active{transform:translateY(3px)}
+.dc .no{align-self:flex-start;font-size:13px;font-weight:900;color:var(--sub);padding-left:4px}
+.dc .ic{width:64px;height:64px;margin:2px 0}
+.dc .ic svg,.mic svg{width:100%;height:100%}
+.dc.lock .ic{filter:brightness(0) opacity(.78)}
+.dc.lock{background:#EDEFF8}
+.dc .q{position:absolute;top:36px;left:0;right:0;text-align:center;font-size:28px;font-weight:900;color:#fff;text-shadow:0 2px 0 var(--ink);pointer-events:none}
+.dc b{font-size:15px;line-height:1.15;text-align:center;font-family:var(--en)}
+.dc small{font-size:14px;color:var(--sub);line-height:1.2}
+.dc.open{background:#FFFBE3}
+.dc.shake{animation:shake .35s}
+#modal{position:fixed;inset:0;background:rgba(43,43,58,.55);display:none;z-index:50;align-items:flex-end}
+#modal.on{display:flex}
+#mbody{width:100%;max-width:480px;margin:0 auto;background:#fff;border:3px solid var(--ink);border-bottom:0;border-radius:26px 26px 0 0;padding:18px 18px max(18px,env(safe-area-inset-bottom));position:relative;text-align:center;animation:slideup .25s}
+#mbody .x{position:absolute;right:12px;top:10px;min-width:44px;min-height:44px;border-radius:14px;background:#fff;border:3px solid var(--ink);font-weight:900}
+.mic{position:relative;width:150px;height:150px;margin:6px auto;transition:filter .9s,transform .5s}
+.mic.sil{filter:brightness(0) opacity(.8)}
+.mic.pop{animation:pop .6s}
+.mq{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:64px;font-weight:900;color:#fff;text-shadow:0 3px 0 var(--ink);pointer-events:none;transition:opacity .4s}
+#minfo h3{margin:4px 0;font-size:28px;font-family:var(--en)}
+#minfo .zz{font-size:22px;font-weight:900}
+#minfo p{margin:6px 0;font-size:16px;color:var(--sub)}
+#minfo p.en{font-family:var(--en);color:var(--ink);font-weight:700;font-size:17px}
+#mact{display:flex;gap:10px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+
+@keyframes pop{0%{transform:scale(.7)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+@keyframes blink{50%{border-color:#FFD0DE}}
+@keyframes pulse{50%{transform:scale(1.04)}}
+@keyframes bob{50%{transform:translateY(-4px)}}
+@keyframes bounce{0%{transform:translateY(0)}30%{transform:translateY(-14px) rotate(-6deg)}60%{transform:translateY(0) rotate(5deg)}100%{transform:translateY(0)}}
+@keyframes wobble{0%,100%{transform:rotate(0)}25%{transform:rotate(-9deg)}75%{transform:rotate(9deg)}}
+@keyframes rise{to{opacity:0;transform:translateY(-40px)}}
+@keyframes bp{from{transform:translate(0,0) scale(.6);opacity:1}to{transform:translate(var(--dx),var(--dy)) scale(1.3);opacity:0}}
+@keyframes slideup{from{transform:translateY(60px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div id="fx"></div>
+<div id="app">
+
+  <section id="reg" class="screen">
+    <div class="mas idle" id="regmas"></div>
+    <h1>⚓ 輪機大冒險<br><small style="font-size:16px;font-weight:700;color:var(--sub)">輪機科 · Lesson 3 + 4</small></h1>
+    <label class="field">班級<input id="fCls" autocomplete="off" placeholder="例:輪機一A"></label>
+    <div class="row2">
+      <label class="field">座號<input id="fSeat" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="例:12"></label>
+      <label class="field">姓名或綽號<input id="fName" autocomplete="off" placeholder="例:小明"></label>
+    </div>
+    <div id="regerr"></div>
+    <button class="btn go" id="regGo">開始冒險 ▶</button>
+  </section>
+
+  <section id="home" class="screen"></section>
+
+  <section id="game" class="screen">
+    <div id="hud">
+      <button id="quit" aria-label="離開">✕</button>
+      <span id="lvname"></span>
+      <span class="pill">⏱ <span id="tm">0:00</span></span>
+      <span class="pill" id="coinPill">🪙 <span id="gc">0</span></span>
+    </div>
+    <div id="pips"></div>
+    <div id="mrow"><div class="mas idle" id="mas"></div><div id="bubble"></div></div>
+    <div id="stage"></div>
+    <div id="foot"><div id="fbtns"></div><button class="btn" id="next">下一題 →</button></div>
+  </section>
+
+  <section id="result" class="screen"></section>
+
+  <section id="dex" class="screen">
+    <div class="dtop"><button class="sq" id="dback" aria-label="返回">←</button><h2>輪機零件圖鑑 <span id="dcount"></span></h2><span class="badge">🪙 <span id="dcoin">0</span></span></div>
+    <div class="tmsg" style="font-size:15px;padding:6px 10px" id="dhint"></div>
+    <div id="dgrid"></div>
+  </section>
+
+  <section id="report" class="screen"></section>
+</div>
+<div id="modal"><div id="mbody"></div></div>
+
+<script>
+/* ========================================================================
+   資料區(換月考範圍只改這裡)
+   欄位:[課, 類型(w單字/p片語), 中文, 語塊(用|分成4~5塊), 句子中文, 答案, [干擾選項x2]]
+   ※ B1L3 片語 try one's best 的原例句含宗教用語,已換成中性例句。
+   ======================================================================== */
+const UNLOCK_COST=8;   // 解開一個零件需要的金幣
+const DATA=[
+/* ---- L3 單字 ---- */
+[3,"w","康復(動)","By taking a few days off,|Sally was able to|recover|quickly|from the flu.","藉由休息了幾天，Sally從流感中迅速康復。","recover",["discover","remove"]],
+[3,"w","康復(名)","Lisa's|quick recovery|from the break-up|surprised|everyone.","Lisa在分手後迅速恢復讓大家非常驚訝。","recovery",["recover","discovery"]],
+[3,"w","外科手術","Mike is getting|surgery|right now|because of|a serious accident.","因為嚴重意外事故，Mike目前正在接受手術。","surgery",["suffer","disease"]],
+[3,"w","遭受；受苦","Ray suffered|from back pain before,|but the pain went away|after he started|doing gentle exercise.","Ray以前受背痛所苦，但是在他開始做和緩運動後，背痛就消失了。","suffered",["recovered","realized"]],
+[3,"w","疾病","COVID-19 was|a terrible disease|when it|first appeared|in 2019.","2019年新冠肺炎首次出現時，是一種可怕的疾病。","disease",["surgery","design"]],
+[3,"w","察覺；意識到","Lily realized|that her son|was a great writer|after she|read his story.","Lily讀了兒子的故事後，才察覺他是個很棒的作家。","realized",["recovered","replied"]],
+[3,"w","描述","The boy couldn't find the words|to describe|his dream car,|so he drew|a picture of it.","男孩找不到文字來描述他夢想中的汽車，所以他把它畫出來。","describe",["design","imagine"]],
+[3,"w","情侶；夫妻","The newly married couple|planned to go|on a trip|to Iceland|for their honeymoon.","這對新婚夫妻計劃要去冰島度蜜月。","couple",["view","nurse"]],
+[3,"w","鼓勵","Mike's parents|always encourage him|to work hard|and follow|his dreams.","Mike的父母一直鼓勵他努力工作與追求夢想。","encourage",["imagine","describe"]],
+[3,"w","景觀","Hotel rooms|with a good view|of the sea|are usually|more expensive.","能看到美麗海景的旅館房間通常比較貴。","view",["design","position"]],
+[3,"w","看待","Most people in Taiwan|view|the LINE smartphone app|as a must-have.","臺灣大部分的人將LINE智慧型手機應用程式視為必備的東西。","view",["realize","return"]],
+[3,"w","想像","Our music teacher|asked us|to close our eyes|and imagine|that we were at a beach.","我們的音樂老師要我們閉上眼睛，想像我們正在海灘上。","imagine",["describe","encourage"]],
+[3,"w","想像力","Leo's poem shows|that he is a kid|with a great|imagination.","Leo的詩顯示他是個擁有無窮想像力的孩子。","imagination",["imagine","invention"]],
+[3,"w","移除","Do you know|any good ways|to remove|the price sticker|from this box?","你知道有什麼好方法可以將價格標籤從這個盒子上移除嗎？","remove",["recover","return"]],
+[3,"w","回答；回覆(動)","Henry replied|right after|he got|my message.","Henry一收到我的訊息後就回覆了。","replied",["returned","realized"]],
+[3,"w","回覆(名)","Max sent an email|to Helen,|but he didn't get|a reply.","Max寄給Helen一封電子郵件，但他沒有收到回覆。","reply",["return","research"]],
+[3,"w","返回","After a one-year trip,|Tom finally|returned|to his hometown.","一年的旅行後，Tom終於回到了他的家鄉。","returned",["removed","replied"]],
+[3,"w","歸還","Jenny returned|Ken's book to him|after she|finished reading it.","Jenny讀完Ken的書後，就把它歸還給Ken了。","returned",["removed","described"]],
+[3,"w","震驚的","Flora was shocked|and upset|when she|heard the news.","當Flora聽到那個消息時，她既震驚又沮喪。","shocked",["blind","regular"]],
+[3,"w","使震驚","The sudden earthquake|in the middle of class|shocked|us all.","課堂中突如其來的地震嚇壞了我們所有人。","shocked",["encouraged","described"]],
+[3,"w","眼盲的","The dog led|the blind woman|safely|across the street.","這隻狗引導這位眼盲的婦人安全過馬路。","blind",["shocked","straight"]],
+[3,"w","低語；耳語","Jenny's brother|laughed out loud|when she whispered|a joke|into his ear.","Jenny輕聲地在她哥哥耳邊講了個笑話，他放聲大笑。","whispered",["replied","described"]],
+/* ---- L3 片語 ---- */
+[3,"p","轉頭不看","Kelly turned away|to hide her tears|during|the touching speech.","Kelly在感人的演講中轉過身去隱藏她的淚水。","turned away",["turned around","passed away"]],
+[3,"p","盡己所能","You can pass|the test|if you|try your best.","只要盡你所能，你就能通過考試。","try your best",["pass away","take action"]],
+[3,"p","日復一日","Cindy waited|for the letter|day after day,|but it|never came.","Cindy日復一日等待那封信，但它從未到來。","day after day",["day after tomorrow","one day after another"]],
+[3,"p","詳細地","The teacher explained|the math problem|to the students|in detail.","老師向學生詳細解釋這道數學題。","in detail",["in advance","on time"]],
+[3,"p","轉身","Gary turned around|and counted to 10|while all his friends|found places|to hide.","Gary轉身數到10，同時他所有的朋友都去找地方躲起來。","turned around",["turned away","went off"]],
+[3,"p","過世","The famous actor|passed away|peacefully|in his sleep.","那位知名男演員於睡夢中安詳辭世。","passed away",["turned away","woke up"]],
+[3,"p","只有；僅僅","Tracy wants|nothing but|a hot bath|after a day|of hard work.","一天的辛苦工作之後，Tracy只想洗個熱水澡。","nothing but",["anything but","nothing for"]],
+/* ---- L4 單字 ---- */
+[4,"w","鬧鐘","I set|two alarms|to wake me up|in the morning.","我設了兩個鬧鐘在早晨叫醒我。","alarms",["designs","positions"]],
+[4,"w","直接地；立即地","Let's go straight|back home|after the|potluck party|tonight.","今晚的百樂餐會結束後，我們就直接回家吧。","straight",["regular","particular"]],
+[4,"w","直的","A group of birds|is flying|in a straight line|across the sky.","一群鳥兒正成一條直線飛過天空。","straight",["regular","amazing"]],
+[4,"w","研究","You'll need|to do some|serious research|before you start|writing your report.","在你開始寫你的報告之前，你將需要做些認真的研究。","research",["design","promise"]],
+[4,"w","睡過頭","Joanna stayed up late|studying for the exam.|Therefore,|she overslept|the next morning.","Joanna為了考試熬夜念書。因此她隔天早上睡過頭了。","overslept",["invented","chased"]],
+[4,"w","令人驚奇的","This restaurant|doesn't look fancy|at all,|but its food|is amazing.","這家餐廳看來一點也不豪華，但它的食物令人驚豔。","amazing",["regular","straight"]],
+[4,"w","發明；創造","A Taiwanese-American,|Peter Tsai,|invented|N95 masks.","一位臺裔美國人Peter Tsai發明了N95口罩。","invented",["solved","chased"]],
+[4,"w","發明者","Karl Benz was|the inventor|of the world's|first modern car.","卡爾．賓士是全世界第一臺現代化汽車的發明者。","inventor",["invented","solution"]],
+[4,"w","解決","Can you believe|that I spent|the whole day|trying to solve|a computer problem?","你相信我花了一整天的時間，就為了試著解決一個電腦問題嗎？","solve",["promise","chase"]],
+[4,"w","解決辦法","Our local government|must come up with|a solution|to the serious|parking problem.","我們的地方政府必須想出一個解決嚴重停車問題的方法。","solution",["solve","research"]],
+[4,"w","一般的","Jessica likes|to drink soy milk|more than|regular|cow's milk.","Jessica喜歡喝豆漿勝過喝一般的牛奶。","regular",["particular","straight"]],
+[4,"w","追逐(動)","The dog stopped|chasing after|the mailman|when its master showed up|and shouted at it.","當主人出現並且對牠喊叫時，那隻狗才停止追趕郵差。","chasing",["inventing","oversleeping"]],
+[4,"w","追逐(名)","The police finally|caught the drunk driver|after|a high-speed chase.","在一陣高速追逐後，警方終於逮到了那名酒駕者。","chase",["research","design"]],
+[4,"w","承諾(動)","John promised|that he would|finish the job|by Friday.","John承諾他會在星期五之前完成這項工作。","promised",["encountered","designed"]],
+[4,"w","承諾(名)","Arvin kept|his promise|to his wife|and did not|drink and drive again.","Arvin對妻子遵守承諾，不再酒駕了。","promise",["position","solution"]],
+[4,"w","設計(動)","The teacher asked|the students|to design|their own|business cards.","這位老師要求學生們設計他們自己的名片。","design",["position","encounter"]],
+[4,"w","設計(名)","Because of|its poor design,|the fan|is hard to use.","因為設計不良，這電扇很難用。","design",["research","chase"]],
+[4,"w","擺放","Let's position|the chairs|over there|so that everyone can sit|and watch the magic show.","讓我們把椅子擺放在那邊，這樣每個人都能坐著看魔術表演。","position",["promise","design"]],
+[4,"w","位置","The position|of the sun|in the sky|shows that|it's almost noon.","太陽在天空中的位置顯示現在差不多是中午了。","position",["design","solution"]],
+[4,"w","特定的","My mother|likes this|particular shampoo.|We can't buy|just any brand.","我媽媽喜歡這款特定的洗髮精。我們不能隨便買任何品牌。","particular",["regular","straight"]],
+[4,"w","創造","Beethoven|continued to create music|even after|his hearing problem|became more serious.","即使在他的聽力問題變得更加嚴重後，貝多芬還是繼續創作音樂。","create",["solve","chase"]],
+[4,"w","有創造力的","Many studies show|that children can|become better|at creative thinking|by playing with LEGO bricks.","許多研究顯示，小孩藉由玩樂高積木，會變得更擅於創造性思考。","creative",["create","regular"]],
+[4,"w","遭遇；遇到","When we encounter|a problem,|we should calm down|and look for|a solution.","當我們遇到問題時，我們應該冷靜下來，並且尋求解決之道。","encounter",["invent","chase"]],
+/* ---- L4 片語 ---- */
+[4,"p","醒來","We should go|to bed now|because we need|to wake up|early in the morning.","我們現在應該去睡覺，因為我們早上需要早起看日出。","wake up",["go off","get out of"]],
+[4,"p","採取行動","The firefighters|took action|right away|to save the people|from the burning house.","消防隊員們立刻採取行動，從燃燒的房子中把人們救出。","took action",["got out","went off"]],
+[4,"p","離開；走出","My family|is going to|get out of town|for a vacation|next week.","下星期我家人將要離城去度假。","get out of",["go off","take action"]],
+[4,"p","準時","Please|hand in|your homework|on time.","請準時交作業。","on time",["in advance","in detail"]],
+[4,"p","(鬧鐘、警報器)發出聲響","All the students and teachers|went outside|when the fire alarm|in the school|went off.","學校裡的火災警鈴響起時，所有的學生與老師們都到戶外去。","went off",["woke up","got out of"]],
+[4,"p","為了……","Remember to take|your medicine|three times a day|in order to|get well soon.","記得一天服藥三次以早日康復。","in order to",["in advance","on time"]],
+[4,"p","事先","Kelly thought|the restaurant|would be busy,|so she booked a table|in advance.","Kelly認為那家餐廳會很忙碌，所以她事先預訂了一桌。","in advance",["on time","in detail"]]
+];
+
+/* ---- 輪機圖鑑(30 項)。圖是簡化示意圖,輪廓用 CSS 把圖塗黑 ---- */
+const svg=s=>'<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'+s+'</svg>';
+const rot=(n,fn)=>{let s='';for(let i=0;i<n;i++)s+=fn(i*360/n);return s;};
+const COMP=[
+["piston","活塞","A piston moves up and down in a cylinder.","活塞在汽缸裡上下移動。",
+ svg('<rect x="18" y="6" width="28" height="28" rx="4" fill="#B6C0CC" stroke="#6B7684" stroke-width="2"/><g stroke="#6B7684" stroke-width="2.5"><line x1="18" y1="12" x2="46" y2="12"/><line x1="18" y1="17" x2="46" y2="17"/><line x1="18" y1="22" x2="46" y2="22"/></g><circle cx="32" cy="28" r="3.5" fill="#6B7684"/><path d="M28.5 34 H35.5 L37 50 H27Z" fill="#8E99A8"/><circle cx="32" cy="54" r="7" fill="#8E99A8"/><circle cx="32" cy="54" r="3" fill="#EEF2F7"/>')],
+["cylinder","汽缸","A cylinder is where the fuel burns.","汽缸是燃料燃燒的地方。",
+ svg('<rect x="14" y="14" width="36" height="42" rx="5" fill="#7C8DA3" stroke="#56677D" stroke-width="2"/><ellipse cx="32" cy="14" rx="18" ry="5" fill="#A9B7C9" stroke="#56677D" stroke-width="2"/><g stroke="#56677D" stroke-width="3"><line x1="14" y1="26" x2="50" y2="26"/><line x1="14" y1="36" x2="50" y2="36"/><line x1="14" y1="46" x2="50" y2="46"/></g><path d="M32 22 q-6 8 0 14 q6 -6 0 -14z" fill="#FF8A3D"/>')],
+["crankshaft","曲軸","A crankshaft changes up and down into turning.","曲軸把上下運動變成旋轉。",
+ svg('<path d="M6 42 H16 V22 H26 V42 H38 V22 H48 V42 H58" fill="none" stroke="#6F7C8C" stroke-width="7" stroke-linejoin="round"/><circle cx="11" cy="42" r="5" fill="#B3BDC9"/><circle cx="32" cy="42" r="5" fill="#B3BDC9"/><circle cx="53" cy="42" r="5" fill="#B3BDC9"/>')],
+["connecting rod","連桿","A connecting rod joins the piston to the crankshaft.","連桿把活塞和曲軸連在一起。",
+ svg('<circle cx="32" cy="12" r="7" fill="#8E99A8"/><circle cx="32" cy="12" r="3" fill="#EEF2F7"/><path d="M28 18 H36 L38 40 H26Z" fill="#8E99A8"/><circle cx="32" cy="50" r="11" fill="#8E99A8"/><circle cx="32" cy="50" r="5.5" fill="#EEF2F7"/>')],
+["valve","閥門","A valve opens and closes a pipe.","閥門可以打開或關上管路。",
+ svg('<rect x="2" y="36" width="60" height="12" fill="#5C7FA6"/><rect x="4" y="32" width="6" height="20" rx="1" fill="#3C5D82"/><rect x="54" y="32" width="6" height="20" rx="1" fill="#3C5D82"/><rect x="24" y="26" width="16" height="12" rx="2" fill="#4A6C93"/><line x1="32" y1="26" x2="32" y2="12" stroke="#333" stroke-width="4"/><ellipse cx="32" cy="11" rx="15" ry="4.5" fill="#E5484D" stroke="#9E2A2E" stroke-width="2"/>')],
+["pump","泵","A pump moves water or oil.","泵可以輸送水或油。",
+ svg('<rect x="2" y="34" width="14" height="9" fill="#3C5D82"/><rect x="34" y="6" width="9" height="16" fill="#3C5D82"/><circle cx="28" cy="38" r="17" fill="#3C7DD9" stroke="#2754A1" stroke-width="2"/><circle cx="28" cy="38" r="8" fill="#A9C7F5"/>'+rot(6,a=>'<line x1="28" y1="38" x2="28" y2="31" stroke="#3C7DD9" stroke-width="2.5" stroke-linecap="round" transform="rotate('+a+' 28 38)"/>')+'<rect x="44" y="30" width="16" height="16" rx="3" fill="#FFB43B" stroke="#C48413" stroke-width="2"/>')],
+["propeller","螺旋槳","A propeller pushes the ship forward.","螺旋槳推著船往前進。",
+ svg(rot(4,a=>'<ellipse cx="32" cy="16" rx="6.5" ry="12" fill="#D9A93A" stroke="#8C6B12" stroke-width="2" transform="rotate('+(a+20)+' 32 32)"/>')+'<circle cx="32" cy="32" r="7" fill="#B8860B" stroke="#8C6B12" stroke-width="2"/>')],
+["shaft","軸","A shaft carries power to the propeller.","軸把動力傳到螺旋槳。",
+ svg('<rect x="2" y="28" width="60" height="8" fill="#9AA5B1" stroke="#6C7683" stroke-width="2"/><rect x="14" y="20" width="7" height="24" rx="1" fill="#6C7683"/><rect x="43" y="20" width="7" height="24" rx="1" fill="#6C7683"/><circle cx="17.5" cy="24" r="1.5" fill="#EEF2F7"/><circle cx="17.5" cy="40" r="1.5" fill="#EEF2F7"/><circle cx="46.5" cy="24" r="1.5" fill="#EEF2F7"/><circle cx="46.5" cy="40" r="1.5" fill="#EEF2F7"/>')],
+["rudder","舵","A rudder turns the ship left or right.","舵讓船向左或向右轉。",
+ svg('<rect x="29" y="2" width="6" height="18" fill="#566070"/><path d="M22 18 H42 V54 Q42 60 36 60 H28 Q22 60 22 54Z" fill="#2E7FBF" stroke="#1D5A8C" stroke-width="2"/><line x1="32" y1="22" x2="32" y2="56" stroke="#9CC9F0" stroke-width="2"/>')],
+["anchor","錨","An anchor keeps the ship in one place.","錨讓船停在同一個地方。",
+ svg('<g fill="none" stroke="#3B4A5C" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="9" r="4"/><line x1="22" y1="19" x2="42" y2="19"/><line x1="32" y1="13" x2="32" y2="54"/><path d="M11 38 Q14 55 32 55 Q50 55 53 38"/></g><path d="M6 38 L16 38 L11 31Z" fill="#3B4A5C"/><path d="M48 38 L58 38 L53 31Z" fill="#3B4A5C"/>')],
+["fuel tank","燃油櫃","A fuel tank holds the fuel.","燃油櫃裝著燃料。",
+ svg('<rect x="8" y="20" width="48" height="34" rx="7" fill="#E39A2D" stroke="#A66A10" stroke-width="2"/><rect x="26" y="12" width="12" height="8" rx="2" fill="#566070"/><path d="M32 28 q-8 10 0 16 q8 -6 0 -16z" fill="#fff"/><rect x="12" y="24" width="3" height="26" rx="1" fill="#F6C46A"/>')],
+["fuel injector","燃油噴油嘴","An injector sprays fuel into the engine.","噴油嘴把燃料噴進引擎。",
+ svg('<rect x="29" y="2" width="6" height="8" fill="#566070"/><rect x="26" y="8" width="12" height="26" fill="#7C8DA3" stroke="#56677D" stroke-width="2"/><rect x="21" y="28" width="22" height="8" rx="2" fill="#5D6E84"/><path d="M28 36 H36 L32 50Z" fill="#A9B7C9"/><g stroke="#FF8A3D" stroke-width="3" stroke-linecap="round"><line x1="32" y1="52" x2="22" y2="61"/><line x1="32" y1="52" x2="32" y2="62"/><line x1="32" y1="52" x2="42" y2="61"/></g>')],
+["turbocharger","渦輪增壓器","A turbocharger gives the engine more air.","渦輪增壓器讓引擎得到更多空氣。",
+ svg('<rect x="2" y="30" width="12" height="13" rx="2" fill="#5D6E84"/><rect x="36" y="6" width="20" height="14" rx="3" fill="#8E99A8" stroke="#5D6E84" stroke-width="2"/><rect x="38" y="16" width="12" height="12" fill="#8E99A8"/><circle cx="28" cy="38" r="19" fill="#8E99A8" stroke="#5D6E84" stroke-width="2"/>'+rot(6,a=>'<line x1="28" y1="38" x2="28" y2="25" stroke="#EEF2F7" stroke-width="3.5" stroke-linecap="round" transform="rotate('+a+' 28 38)"/>')+'<circle cx="28" cy="38" r="4.5" fill="#5D6E84"/>')],
+["boiler","鍋爐","A boiler heats water to make steam.","鍋爐把水加熱變成蒸汽。",
+ svg('<rect x="38" y="8" width="9" height="16" fill="#6C7683"/><circle cx="46" cy="5" r="4" fill="#DDE4EC"/><rect x="8" y="22" width="44" height="26" rx="13" fill="#C8553D" stroke="#8E3623" stroke-width="2"/><rect x="12" y="48" width="5" height="9" fill="#6C7683"/><rect x="42" y="48" width="5" height="9" fill="#6C7683"/><circle cx="20" cy="35" r="2" fill="#F0A090"/><circle cx="30" cy="35" r="2" fill="#F0A090"/><circle cx="40" cy="35" r="2" fill="#F0A090"/><path d="M29 60 q-5 -5 0 -9 q5 4 0 9z" fill="#FFB43B"/>')],
+["generator","發電機","A generator makes electricity.","發電機可以發電。",
+ svg('<rect x="6" y="18" width="38" height="28" rx="6" fill="#4C9F70" stroke="#2F6F4D" stroke-width="2"/><rect x="44" y="24" width="9" height="16" rx="2" fill="#2F6F4D"/><rect x="53" y="30" width="9" height="4" fill="#C9CED6"/><rect x="10" y="46" width="7" height="8" fill="#566070"/><rect x="33" y="46" width="7" height="8" fill="#566070"/><path d="M26 21 L17 34 H24 L21 43 L33 28 H26Z" fill="#FFD23F"/>')],
+["gear","齒輪","Gears work together to move power.","齒輪互相咬合來傳遞動力。",
+ svg(rot(8,a=>'<rect x="28" y="6" width="8" height="13" rx="1.5" fill="#A9B7C9" stroke="#6B7684" stroke-width="1.5" transform="rotate('+a+' 32 32)"/>')+'<circle cx="32" cy="32" r="18" fill="#A9B7C9" stroke="#6B7684" stroke-width="2"/><circle cx="32" cy="32" r="7" fill="#EEF2F7" stroke="#6B7684" stroke-width="2"/>')],
+["bearing","軸承","A bearing helps a shaft turn smoothly.","軸承讓軸順順地轉動。",
+ svg('<circle cx="32" cy="32" r="26" fill="#C9D1DA" stroke="#7C8896" stroke-width="2"/><circle cx="32" cy="32" r="17" fill="#8E99A8"/>'+rot(8,a=>'<circle cx="32" cy="18" r="3.4" fill="#EEF2F7" stroke="#7C8896" stroke-width="1" transform="rotate('+a+' 32 32)"/>')+'<circle cx="32" cy="32" r="9" fill="#EEF2F7" stroke="#7C8896" stroke-width="2"/>')],
+["filter","濾器","A filter cleans oil, fuel, or water.","濾器可以過濾油、燃料或水。",
+ svg('<rect x="3" y="14" width="16" height="7" fill="#566070"/><rect x="45" y="14" width="16" height="7" fill="#566070"/><rect x="20" y="8" width="24" height="7" rx="2" fill="#566070"/><rect x="17" y="14" width="30" height="40" rx="5" fill="#3C7DD9" stroke="#2754A1" stroke-width="2"/><rect x="17" y="28" width="30" height="12" fill="#FFD23F"/><rect x="21" y="54" width="22" height="6" rx="2" fill="#566070"/>')],
+["heat exchanger","熱交換器","A heat exchanger moves heat from one liquid to another.","熱交換器把熱從一種液體傳到另一種。",
+ svg('<rect x="16" y="14" width="7" height="10" fill="#5D7F9F"/><rect x="41" y="14" width="7" height="10" fill="#5D7F9F"/><rect x="16" y="40" width="7" height="10" fill="#5D7F9F"/><rect x="41" y="40" width="7" height="10" fill="#5D7F9F"/><rect x="10" y="22" width="44" height="20" rx="3" fill="#9BB2C8" stroke="#5D7F9F" stroke-width="2"/><rect x="4" y="19" width="9" height="26" rx="2" fill="#5D7F9F"/><rect x="51" y="19" width="9" height="26" rx="2" fill="#5D7F9F"/><g stroke="#5D7F9F" stroke-width="2"><line x1="14" y1="28" x2="50" y2="28"/><line x1="14" y1="32" x2="50" y2="32"/><line x1="14" y1="36" x2="50" y2="36"/></g>')],
+["pressure gauge","壓力錶","A pressure gauge shows how strong the pressure is.","壓力錶顯示壓力有多大。",
+ svg('<rect x="28" y="50" width="8" height="12" fill="#B0B7BF"/><circle cx="32" cy="30" r="24" fill="#F5F7FA" stroke="#566070" stroke-width="4"/>'+rot(9,a=>'<line x1="32" y1="10" x2="32" y2="15" stroke="#566070" stroke-width="2.5" transform="rotate('+(a-140)+' 32 30)"/>')+'<path d="M16 38 A18 18 0 0 1 21 20" fill="none" stroke="#2DBE7E" stroke-width="4"/><path d="M43 20 A18 18 0 0 1 48 38" fill="none" stroke="#E5484D" stroke-width="4"/><line x1="32" y1="30" x2="43" y2="19" stroke="#E5484D" stroke-width="3.5" stroke-linecap="round"/><circle cx="32" cy="30" r="3.5" fill="#333"/>')],
+["thermometer","溫度計","A thermometer shows how hot something is.","溫度計顯示東西有多熱。",
+ svg('<rect x="26" y="4" width="12" height="40" rx="6" fill="#F3F7FA" stroke="#9FB3C2" stroke-width="2"/><circle cx="32" cy="48" r="10" fill="#E5484D" stroke="#9E2A2E" stroke-width="2"/><rect x="30" y="16" width="4" height="32" rx="2" fill="#E5484D"/><g stroke="#9FB3C2" stroke-width="2"><line x1="40" y1="12" x2="47" y2="12"/><line x1="40" y1="20" x2="45" y2="20"/><line x1="40" y1="28" x2="47" y2="28"/><line x1="40" y1="36" x2="45" y2="36"/></g>')],
+["flange","法蘭","A flange joins two pipes together.","法蘭把兩根管子接在一起。",
+ svg('<rect x="6" y="6" width="52" height="52" rx="12" fill="#8E99A8" stroke="#566070" stroke-width="2"/>'+'<circle cx="16" cy="16" r="3.6" fill="#566070"/><circle cx="48" cy="16" r="3.6" fill="#566070"/><circle cx="16" cy="48" r="3.6" fill="#566070"/><circle cx="48" cy="48" r="3.6" fill="#566070"/>'+'<circle cx="32" cy="32" r="14" fill="#EEF2F7" stroke="#566070" stroke-width="2"/><circle cx="32" cy="32" r="9" fill="#C6CFDA"/>')],
+["wrench","扳手","A wrench helps us tighten bolts.","扳手幫我們鎖緊螺栓。",
+ svg('<g transform="rotate(-40 32 32)"><path d="M21 17 A11 11 0 0 1 28 3 V14 H36 V3 A11 11 0 0 1 43 17 L37 26 H27Z" fill="#9AA5B1" stroke="#6C7683" stroke-width="2"/><rect x="27" y="24" width="10" height="34" rx="4" fill="#9AA5B1" stroke="#6C7683" stroke-width="2"/><rect x="27" y="44" width="10" height="9" fill="#E5484D"/></g>')],
+["compressor","壓縮機","A compressor squeezes air.","壓縮機把空氣壓縮。",
+ svg('<rect x="8" y="32" width="40" height="20" rx="10" fill="#3C7DD9" stroke="#2754A1" stroke-width="2"/><rect x="14" y="12" width="20" height="20" rx="3" fill="#FFB43B" stroke="#C48413" stroke-width="2"/><circle cx="42" cy="22" r="7" fill="#fff" stroke="#566070" stroke-width="2"/><line x1="42" y1="22" x2="46" y2="18" stroke="#E5484D" stroke-width="2"/><rect x="14" y="52" width="5" height="7" fill="#566070"/><rect x="37" y="52" width="5" height="7" fill="#566070"/><path d="M48 42 H58 V30" fill="none" stroke="#333" stroke-width="3"/>')],
+["blower","鼓風機","A blower pushes air through the engine room.","鼓風機把空氣送進機艙。",
+ svg('<rect x="36" y="8" width="24" height="16" rx="3" fill="#3FAEA6" stroke="#1F7F78" stroke-width="2"/><circle cx="28" cy="36" r="23" fill="#5CC8C0" stroke="#1F7F78" stroke-width="2"/>'+rot(5,a=>'<ellipse cx="28" cy="24" rx="5.5" ry="10" fill="#EAFBF9" transform="rotate('+a+' 28 36)"/>')+'<circle cx="28" cy="36" r="5" fill="#1F7F78"/>')],
+["life jacket","救生衣","A life jacket keeps you safe in the water.","救生衣讓你在水中更安全。",
+ svg('<path d="M20 6 Q32 20 44 6 L56 18 L50 28 L46 24 V58 H18 V24 L14 28 L8 18Z" fill="#FF8A3D" stroke="#C25A12" stroke-width="2" stroke-linejoin="round"/><rect x="18" y="32" width="28" height="6" fill="#fff"/><rect x="18" y="46" width="28" height="6" fill="#fff"/><line x1="32" y1="16" x2="32" y2="58" stroke="#C25A12" stroke-width="2"/>')],
+["life buoy","救生圈","A life buoy floats on the water.","救生圈會浮在水上。",
+ svg('<circle cx="32" cy="32" r="22" fill="none" stroke="#FF5D4D" stroke-width="13"/><circle cx="32" cy="32" r="22" fill="none" stroke="#fff" stroke-width="13" stroke-dasharray="17.28 17.28" stroke-dashoffset="8.64"/><circle cx="32" cy="32" r="28.5" fill="none" stroke="#C93A2B" stroke-width="1.5"/><circle cx="32" cy="32" r="15.5" fill="none" stroke="#C93A2B" stroke-width="1.5"/>')],
+["fire extinguisher","滅火器","A fire extinguisher puts out small fires.","滅火器可以撲滅小火。",
+ svg('<rect x="19" y="20" width="26" height="38" rx="9" fill="#E5484D" stroke="#9E2A2E" stroke-width="2"/><rect x="28" y="12" width="8" height="9" fill="#333"/><rect x="22" y="8" width="20" height="5" rx="2" fill="#333"/><path d="M38 14 C50 14 52 22 50 32" fill="none" stroke="#333" stroke-width="3"/><rect x="24" y="34" width="16" height="12" rx="2" fill="#fff"/><circle cx="32" cy="27" r="3" fill="#FFD23F"/>')],
+["winch","絞機","A winch pulls up the anchor or ropes.","絞機可以拉起錨或繩子。",
+ svg('<rect x="6" y="46" width="46" height="7" rx="2" fill="#566070"/><rect x="8" y="16" width="7" height="32" rx="2" fill="#566070"/><rect x="41" y="16" width="7" height="32" rx="2" fill="#566070"/><rect x="15" y="22" width="26" height="20" fill="#7C8DA3" stroke="#56677D" stroke-width="2"/><g stroke="#C9A35B" stroke-width="3"><line x1="19" y1="22" x2="19" y2="42"/><line x1="25" y1="22" x2="25" y2="42"/><line x1="31" y1="22" x2="31" y2="42"/><line x1="37" y1="22" x2="37" y2="42"/></g><line x1="48" y1="32" x2="59" y2="20" stroke="#E5484D" stroke-width="4" stroke-linecap="round"/><circle cx="59" cy="19" r="3" fill="#E5484D"/>')],
+["funnel","煙囪","A funnel lets the smoke out of the ship.","煙囪讓煙從船上排出。",
+ svg('<circle cx="30" cy="5" r="4" fill="#DDE4EC"/><circle cx="38" cy="4" r="3.2" fill="#DDE4EC"/><path d="M17 58 L22 16 H44 L49 58Z" fill="#E5484D" stroke="#9E2A2E" stroke-width="2" stroke-linejoin="round"/><rect x="21" y="9" width="24" height="9" rx="2" fill="#2B2B3A"/><path d="M19.5 38 H46.5 L47.5 46 H18.5Z" fill="#fff"/>')]
+];
+</script>
+<script>
+/* ========================================================================
+   程式區
+   ======================================================================== */
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const pad=n=>String(n).padStart(2,"0");
+const dstr=t=>{const d=new Date(t||Date.now());return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());};
+const tstr=t=>{const d=new Date(t||Date.now());return dstr(t)+" "+pad(d.getHours())+":"+pad(d.getMinutes());};
+const fmtClock=ms=>{const s=Math.floor(ms/1000);return Math.floor(s/60)+":"+pad(s%60);};
+const fmtDur=ms=>{const s=Math.round(ms/1000);return s<60?s+" 秒":Math.floor(s/60)+" 分 "+(s%60)+" 秒";};
+function mkCode(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}return (h>>>0).toString(36).toUpperCase().padStart(6,"0").slice(-5);}
+
+/* ---------- 字庫 ---------- */
+function findAns(text,ans){
+  const t=text.toLowerCase(),a=ans.toLowerCase();let i=-1;
+  while((i=t.indexOf(a,i+1))>=0){
+    const b=i===0||!/[a-z]/.test(t[i-1]);
+    const e=i+a.length>=t.length||!/[a-z]/.test(t[i+a.length]);
+    if(b&&e)return i;
+  }
+  return -1;
+}
+const ITEMS=DATA.map((r,i)=>{
+  const chunks=r[3].split("|"),text=chunks.join(" "),idx=findAns(text,r[5]);
+  return {id:i,L:r[0],k:r[1],zw:r[2],chunks,text,zs:r[4],ans:r[5],d:r[6],pre:text.slice(0,idx),post:text.slice(idx+r[5].length),ok:idx>=0};
+}).filter(i=>i.ok);
+const WORDS=ITEMS.filter(i=>i.k==="w");
+const COMPS=COMP.map((c,i)=>({id:i,en:c[0],zh:c[1],de:c[2],dz:c[3],svg:c[4]}));
+
+/* ---------- 儲存(手機瀏覽器,可能被清掉) ---------- */
+const KEY="b1_l34_v2_marine";
+let db={v:2,last:null,profiles:{},set:{sound:true,vib:true}};
+try{const r=JSON.parse(localStorage.getItem(KEY)||"null");if(r&&r.profiles)db=Object.assign(db,r);}catch(e){}
+db.set=db.set||{sound:true,vib:true};
+const saveDb=()=>{try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){}};
+let P=null;
+function openProfile(cls,seat,name){
+  const id=(cls+"|"+seat+"|"+name).replace(/\s+/g,"");
+  if(!db.profiles[id])db.profiles[id]={id,cls,seat,name,coins:0,earned:0,unlocked:[],pts:{},totalMs:0,runs:[],best:{},ok:0,seen:0};
+  db.last=id;saveDb();P=db.profiles[id];
+}
+
+/* ---------- 聲音與震動 ---------- */
+let voice=null;
+function pickVoice(){try{const vs=speechSynthesis.getVoices();voice=vs.find(v=>/en[-_]US/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang))||null;}catch(e){}}
+if("speechSynthesis" in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
+function speak(text,rate,cb){
+  let fired=false;const f=()=>{if(!fired){fired=true;if(cb)cb();}};
+  if(!("speechSynthesis" in window)){setTimeout(f,1000);return;}
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang="en-US";if(voice)u.voice=voice;u.rate=rate||0.9;
+    u.onend=f;u.onerror=f;
+    setTimeout(f,Math.max(2500,text.length*(rate&&rate<0.8?170:110)));
+    speechSynthesis.speak(u);
+  }catch(e){setTimeout(f,1000);}
+}
+let ac=null;
+function tone(f,d,delay,type,v){
+  if(!db.set.sound)return;
+  try{
+    ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+    const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime+(delay||0);
+    o.type=type||"sine";o.frequency.value=f;
+    g.gain.setValueAtTime(v||0.13,t);g.gain.exponentialRampToValueAtTime(0.001,t+d);
+    o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+d);
+  }catch(e){}
+}
+function vib(p){if(db.set.vib&&navigator.vibrate){try{navigator.vibrate(p);}catch(e){}}}
+const sfx={
+  ok(c){tone(660,.12,0);tone(880,.16,.09);if(c>=3)tone(1100,.18,.2);vib(25);},
+  perfect(){tone(660,.1,0);tone(880,.1,.08);tone(1175,.2,.16);vib([25,40,25]);},
+  no(){tone(330,.16,0,"triangle",.1);tone(262,.22,.13,"triangle",.1);vib(60);},   // 柔和的低音,不刺耳
+  tick(){tone(520,.05,0,"sine",.07);},
+  coin(){tone(1320,.08,0,"square",.05);tone(1760,.14,.07,"square",.05);},
+  fin(){[523,659,784,1046].forEach((f,i)=>tone(f,.2,i*.12));vib([40,60,40,60,80]);},
+  unlock(){[392,523,659,784,1046].forEach((f,i)=>tone(f,.22,i*.1));vib([50,60,50,60,120]);}
+};
+
+/* ---------- 吉祥物「小電」 ---------- */
+function mascot(state){
+  const eyes=state==="happy"
+    ?'<path d="M17 39 q4 -6 8 0 M31 39 q4 -6 8 0" fill="none" stroke="#2B2B3A" stroke-width="3" stroke-linecap="round"/>'
+    :'<circle cx="21" cy="39" r="3.4" fill="#2B2B3A"/><circle cx="35" cy="39" r="3.4" fill="#2B2B3A"/>';
+  const brow=state==="oops"?'<path d="M15 35 l8 -2.6 M41 35 l-8 -2.6" stroke="#2B2B3A" stroke-width="2.5" stroke-linecap="round"/><path d="M47 33 q3.5 5 0 8 q-3.5 -3 0 -8z" fill="#6FA8FF" stroke="#2B2B3A" stroke-width="1.5"/>':'';
+  const mouth=state==="happy"
+    ?'<path d="M20 45 q8 9 16 0 z" fill="#FF6B81" stroke="#2B2B3A" stroke-width="2.5" stroke-linejoin="round"/>'
+    :state==="oops"
+    ?'<path d="M24 49 q4 -4 8 0" fill="none" stroke="#2B2B3A" stroke-width="3" stroke-linecap="round"/>'
+    :'<path d="M22 46 q6 5 12 0" fill="none" stroke="#2B2B3A" stroke-width="3" stroke-linecap="round"/>';
+  return '<svg viewBox="0 0 56 56" aria-hidden="true">'+
+   '<path d="M9 52 Q28 62 47 52 L50 58 H6Z" fill="#3F6FE0" stroke="#2B2B3A" stroke-width="2.5" stroke-linejoin="round"/>'+
+   '<circle cx="28" cy="35" r="18" fill="#FFD9B0" stroke="#2B2B3A" stroke-width="3"/>'+
+   '<circle cx="14" cy="44" r="3" fill="#FF9EB5" opacity=".8"/><circle cx="42" cy="44" r="3" fill="#FF9EB5" opacity=".8"/>'+
+   '<path d="M8 31 Q9 8 28 8 Q47 8 48 31 Z" fill="#FF8A3D" stroke="#2B2B3A" stroke-width="3" stroke-linejoin="round"/>'+
+   '<rect x="5" y="29" width="46" height="6" rx="3" fill="#FF8A3D" stroke="#2B2B3A" stroke-width="3"/>'+
+   '<rect x="24" y="8" width="8" height="21" fill="#FFD23F" stroke="#2B2B3A" stroke-width="2"/>'+
+   '<circle cx="28" cy="18" r="0" fill="none"/>'+eyes+brow+mouth+'</svg>';
+}
+function setMas(el,state){el.className="mas "+(state==="idle"?"idle":state);el.innerHTML=mascot(state);}
+
+/* ---------- 特效 ---------- */
+function burst(emos,n){
+  const fx=$("#fx");
+  for(let i=0;i<n;i++){
+    const s=document.createElement("span");s.className="bp";s.textContent=rnd(emos);
+    const a=Math.random()*Math.PI*2,d=70+Math.random()*110;
+    s.style.setProperty("--dx",Math.cos(a)*d+"px");s.style.setProperty("--dy",(Math.sin(a)*d-30)+"px");
+    fx.appendChild(s);setTimeout(()=>s.remove(),1100);
+  }
+}
+function coinFly(txt){
+  const pill=$("#coinPill");if(!pill||!$("#game").classList.contains("on"))return;
+  const r=pill.getBoundingClientRect(),p=document.createElement("div");
+  p.className="plus";p.textContent=txt;p.style.left=(r.left+r.width/2-16)+"px";p.style.top=(r.bottom+2)+"px";
+  document.body.appendChild(p);setTimeout(()=>p.remove(),1000);
+}
+
+/* ---------- 畫面切換 ---------- */
+function show(id){document.querySelectorAll(".screen").forEach(e=>e.classList.toggle("on",e.id===id));}
+
+/* ---------- 登記 ---------- */
+$("#regmas").innerHTML=mascot("happy");
+$("#regGo").onclick=()=>{
+  const c=$("#fCls").value.trim(),s=$("#fSeat").value.trim(),n=$("#fName").value.trim();
+  if(!c||!s||!n){$("#regerr").textContent="三格都要填喔!";return;}
+  if(!/^\d{1,3}$/.test(s)){$("#regerr").textContent="座號請填數字";return;}
+  $("#regerr").textContent="";
+  openProfile(c,String(parseInt(s,10)),n);renderHome();show("home");
+};
+
+/* ---------- 首頁 ---------- */
+const LV={
+  1:{name:"單字聽寫",sub:"聽音，補上母音或雙母音",emo:"🎧",col:"#FFB3C7"},
+  2:{name:"句子重組",sub:"把語塊排成正確的句子",emo:"🧩",col:"#A8E6CF"},
+  3:{name:"例句選擇",sub:"聽句子，選出正確的字",emo:"🎯",col:"#B7C8FF"}
+};
+let guess=null;
+const starsOf=n=>"⭐".repeat(n||0)+"☆".repeat(3-(n||0));
+function renderHome(){
+  const h=$("#home"),canOpen=P.coins>=UNLOCK_COST;
+  h.innerHTML=
+   '<div class="hhead"><div class="mas idle" id="hmas"></div><div class="hi"><b>嗨，'+esc(P.name)+'！</b><small>'+esc(P.cls)+'　'+esc(P.seat)+' 號</small></div>'+
+   '<span class="badge">🪙 '+P.coins+'</span></div>'+
+   '<div class="card guess">⏱ 猜猜看，一關 10 題要花幾分鐘？<div class="chips" id="gchips">'+
+   [3,5,10,15].map(m=>'<button class="chip'+(guess===m?' on':'')+'" data-m="'+m+'">'+m+' 分</button>').join("")+'</div></div>'+
+   [1,2,3].map(l=>'<button class="lv" data-l="'+l+'" style="background:'+LV[l].col+'"><span class="e">'+LV[l].emo+'</span><span class="t"><b>第 '+l+' 關　'+LV[l].name+'</b><small>'+LV[l].sub+'</small></span><span class="s">'+starsOf(P.best[l])+'</span></button>').join("")+
+   '<div class="hbot"><button class="btn sec'+(canOpen?' pulse':'')+'" id="gDex">📖 輪機圖鑑 '+P.unlocked.length+'/'+COMPS.length+(canOpen?' 🔓':'')+'</button><button class="btn sec" id="gRep">📋 成績單</button></div>'+
+   '<div class="tgl"><button id="tSnd" class="'+(db.set.sound?'':'off')+'">🔊 音效</button><button id="tVib" class="'+(db.set.vib?'':'off')+'">📳 震動</button><button id="tWho">👤 換人</button></div>';
+  setMas($("#hmas"),"idle");
+  h.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{guess=(guess===+b.dataset.m)?null:+b.dataset.m;renderHome();});
+  h.querySelectorAll(".lv").forEach(b=>b.onclick=()=>startLevel(+b.dataset.l));
+  $("#gDex").onclick=openDex;$("#gRep").onclick=()=>{renderReport();show("report");};
+  $("#tSnd").onclick=()=>{db.set.sound=!db.set.sound;saveDb();if(db.set.sound)sfx.tick();renderHome();};
+  $("#tVib").onclick=()=>{db.set.vib=!db.set.vib;saveDb();if(db.set.vib)vib(40);renderHome();};
+  $("#tWho").onclick=()=>{$("#fCls").value="";$("#fSeat").value="";$("#fName").value="";show("reg");};
+}
+
+/* ---------- 計時:只算畫面開著、且 45 秒內有操作的時間 ---------- */
+let G=null,sid=0,lastAct=Date.now(),tickN=0;
+["pointerdown","touchstart","keydown"].forEach(ev=>addEventListener(ev,()=>{lastAct=Date.now();},{passive:true,capture:true}));
+setInterval(()=>{
+  if(!G||!G.running||document.visibilityState!=="visible"||Date.now()-lastAct>45000)return;
+  G.ms+=250;P.totalMs+=250;
+  if(++tickN%2===0)$("#tm").textContent=fmtClock(G.ms);
+},250);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"&&P)saveDb();});
+
+/* ---------- 一關的流程 ---------- */
+function startLevel(lvl){
+  const pool=lvl===1?WORDS:ITEMS;
+  const picks=shuffle(pool.map(it=>({it,w:(P.pts[it.id]||0)+Math.random()*3})).sort((a,b)=>a.w-b.w).slice(0,10).map(x=>x.it));
+  G={lvl,items:picks,i:-1,ok:0,combo:0,maxCombo:0,coins:0,ms:0,wrong:[],running:true,guess,cur:null};
+  lastAct=Date.now();
+  $("#lvname").textContent="第 "+lvl+" 關 · "+LV[lvl].name;
+  $("#lvname").style.background=LV[lvl].col;
+  $("#tm").textContent="0:00";$("#gc").textContent="0";
+  $("#pips").innerHTML=picks.map(()=>"<i></i>").join("");
+  $("#bubble").classList.remove("on");setMas($("#mas"),"idle");
+  const q=$("#quit");q.textContent="✕";q.classList.remove("arm");
+  show("game");next();
+}
+$("#quit").onclick=function(){
+  if(!this.classList.contains("arm")){this.classList.add("arm");this.textContent="離開?";setTimeout(()=>{this.classList.remove("arm");this.textContent="✕";},2500);return;}
+  if(G)G.running=false;sid++;saveDb();try{speechSynthesis.cancel();}catch(e){}
+  renderHome();show("home");
+};
+function pips(){[...$("#pips").children].forEach((p,i)=>{if(i===G.i&&!p.className)p.className="cur";});}
+function next(){
+  sid++;G.i++;
+  if(G.i>=10)return endLevel();
+  const it=G.items[G.i];G.cur=it;
+  $("#next").classList.remove("on");$("#next").onclick=null;
+  pips();
+  const tok=sid;
+  if(G.lvl===1)renderL1(it,tok);else if(G.lvl===2)renderL2(it,tok);else renderL3(it,tok);
+}
+const stage=h=>{$("#stage").innerHTML=h;$("#stage").scrollTop=0;};
+function setFoot(list){
+  const f=$("#fbtns");f.innerHTML="";
+  list.forEach(o=>{const b=document.createElement("button");b.className="sq"+(o.txt?" txt":"");b.innerHTML=o.t;b.onclick=o.fn;if(o.id)b.id=o.id;f.appendChild(b);});
+}
+function advance(tok,ms){setTimeout(()=>{if(sid===tok)next();},ms);}
+function showNext(tok){const nb=$("#next");nb.classList.add("on");nb.onclick=()=>{if(sid===tok)next();};}
+function zhMode(it,lvl){
+  if(lvl===3)return "btn";                       // 例句選擇:中文固定是按鈕
+  const m=Math.floor((P.pts[it.id]||0)/2);        // 0~3:中文常駐 → 按鈕 → 不出現
+  return m>=2?"none":m===1?"btn":"show";
+}
+function zhBtn(onUse){
+  return {t:"💡 中文",txt:true,id:"bZh",fn:()=>{onUse();const b=$("#bZh");if(b)b.remove();}};
+}
+
+/* ---------- 鼓勵語 ---------- */
+const CH_OK=[["Great job!","你好棒！"],["Awesome!","太厲害了！"],["You did it!","答對了！"],["Super!","超強的！"],["Nice work!","做得好！"],["Fantastic!","太讚了！"],["Wow!","越來越熟了！"]];
+const CH_NO=[["Nice try!","沒關係，再看一次！"],["Almost!","差一點點喔！"],["Good effort!","錯一次，就記得更牢！"],["Keep going!","加油，你可以的！"],["That's okay!","每個人都會錯，下次一定會！"],["Mistakes help us learn!","錯誤讓我們進步！"]];
+let bubTimer=null;
+function say(kind){
+  let t;
+  if(kind==="combo")t=["On fire!","連續答對，火力全開！"];
+  else if(kind==="perfect")t=["Perfect!","完美！"];
+  else if(kind==="ok")t=rnd(CH_OK);else t=rnd(CH_NO);
+  const b=$("#bubble");b.innerHTML='<div><b lang="en">'+esc(t[0])+'</b> <span lang="zh-Hant">'+esc(t[1])+'</span></div>';b.classList.add("on");
+  setMas($("#mas"),kind==="no"?"oops":"happy");
+  clearTimeout(bubTimer);const tk=sid;
+  bubTimer=setTimeout(()=>{if(sid===tk||true){b.classList.remove("on");setMas($("#mas"),"idle");}},kind==="no"?2600:1500);
+}
+
+/* ---------- 完成一題 ---------- */
+function finishQ(ok,perfect){
+  const it=G.cur,id=it.id,pip=$("#pips").children[G.i];
+  if(ok&&perfect)P.pts[id]=Math.min(6,(P.pts[id]||0)+1);
+  else if(!ok)P.pts[id]=Math.max(0,(P.pts[id]||0)-1);
+  P.seen++;
+  if(ok){
+    P.ok++;G.ok++;G.combo++;G.maxCombo=Math.max(G.maxCombo,G.combo);
+    let gain=1;if(G.combo%5===0)gain=2;
+    P.coins+=gain;P.earned+=gain;G.coins+=gain;$("#gc").textContent=G.coins;
+    if(pip)pip.className="ok";
+    say(G.combo>=5&&G.combo%5===0?"combo":perfect?(Math.random()<.35?"perfect":"ok"):"ok");
+    if(perfect)sfx.perfect();else sfx.ok(G.combo);
+    setTimeout(()=>sfx.coin(),220);coinFly("+"+gain+" 🪙");burst(["⭐","✨","🪙"],7);
+  }else{
+    G.combo=0;G.wrong.push(it);if(pip)pip.className="bad";
+    say("no");sfx.no();
+  }
+  saveDb();
+}
+
+/* ---------- 第 1 關:單字聽寫(補母音/雙母音) ---------- */
+const VOWELS=["a","e","i","o","u"];
+const DIGRAPHS=["ai","ay","ea","ee","ie","ei","oa","oo","ou","ow","io","ue","au"];
+function parseWord(w){
+  const parts=[],re=/[aeiou]+/gi;let last=0,m;
+  while((m=re.exec(w))){if(m.index>last)parts.push({c:w.slice(last,m.index)});parts.push({v:m[0]});last=m.index+m[0].length;}
+  if(last<w.length)parts.push({c:w.slice(last)});
+  return parts;
+}
+// 單母音:從 a e i o u 選 4 個(含答案);雙母音:4 個選項全是雙母音
+function slotOptions(v){
+  if(v.length===1)return shuffle([v].concat(shuffle(VOWELS.filter(x=>x!==v)).slice(0,3)));
+  const others=DIGRAPHS.filter(x=>x!==v);
+  const share=others.filter(x=>[...x].some(ch=>v.indexOf(ch)>=0));
+  const rest=others.filter(x=>share.indexOf(x)<0);
+  const pick=shuffle(share).slice(0,3);
+  pick.push(...shuffle(rest).slice(0,3-pick.length));
+  return shuffle([v].concat(pick));
+}
+function renderL1(it,tok){
+  const mode=zhMode(it,1);let zhUsed=false,zhOn=mode==="show";
+  const parts=parseWord(it.ans.toLowerCase());
+  const slots=parts.map((p,i)=>p.v?i:-1).filter(i=>i>=0);
+  let cur=0,mistakes=0,slotMiss=0,assist=false,finished=false;
+  stage('<div class="card"><div class="tag">🎧 聽一聽，補上母音</div><div class="word" id="word"></div>'+
+    '<div class="sent" lang="en" style="font-size:clamp(16px,4.6vw,20px);color:var(--sub)">'+esc(it.pre)+"____"+esc(it.post)+'</div>'+
+    '<div class="zh" id="zh" lang="zh-Hant"></div></div>'+
+    '<div class="tiles" id="tiles"></div>');
+  const showZh=()=>{zhOn=true;$("#zh").innerHTML="<b>"+esc(it.zw)+"</b>　"+esc(it.zs);};
+  if(zhOn)showZh();
+  const wd=$("#word"),tiles=$("#tiles");
+  const paint=()=>{
+    wd.innerHTML="";
+    parts.forEach((p,i)=>{
+      const s=document.createElement("span");
+      if(p.c){s.className="c";s.textContent=p.c;}
+      else{const k=slots.indexOf(i);s.className="slot"+(k<cur?" done":k===cur?" act":"");s.textContent=k<cur?p.v:"";}
+      wd.appendChild(s);
+    });
+    let fs=42;wd.style.fontSize=fs+'px';
+    while(fs>16&&wd.scrollWidth>wd.clientWidth){fs-=1;wd.style.fontSize=fs+'px';}
+  };
+  const load=()=>{
+    tiles.innerHTML="";if(cur>=slots.length)return;
+    const want=parts[slots[cur]].v;slotMiss=0;
+    slotOptions(want).forEach(o=>{
+      const b=document.createElement("button");b.className="opt";b.textContent=o;b.lang="en";
+      b.onclick=()=>{
+        if(finished)return;
+        if(o===want){
+          sfx.tick();cur++;paint();
+          if(cur>=slots.length){
+            finished=true;tiles.innerHTML="";showZh();
+            const ok=mistakes<=1;
+            finishQ(ok,mistakes===0&&!assist&&!zhUsed);
+            if(ok){speak(it.ans,.8);advance(tok,1700);}
+            else{showNext(tok);speak(it.ans,.7,()=>{if(sid===tok)speak(it.text,.9);});}
+          }else load();
+        }else{
+          mistakes++;slotMiss++;b.classList.add("no");b.disabled=true;sfx.no();
+          if(slotMiss>=2){assist=true;[...tiles.children].forEach(x=>{if(x.textContent===want)x.classList.add("ok");});}
+        }
+      };
+      tiles.appendChild(b);
+    });
+  };
+  paint();load();
+  speak(it.ans,.75,()=>{if(sid===tok)speak(it.text,.9);});
+  const foot=[{t:"🔊",fn:()=>speak(it.ans,.85)},{t:"🐢",fn:()=>speak(it.ans,.55)},{t:"📖",fn:()=>speak(it.text,.9)}];
+  if(mode==="btn")foot.push(zhBtn(()=>{zhUsed=true;showZh();}));
+  setFoot(foot);
+}
+
+/* ---------- 第 2 關:句子重組(4~5 個語塊) ---------- */
+function renderL2(it,tok){
+  const mode=zhMode(it,2);let zhUsed=false,zhOn=mode==="show";
+  const ch=it.chunks;let step=0,mistakes=0,stepMiss=0,assist=false,finished=false;
+  let order=shuffle(ch.map((c,i)=>i));
+  for(let t=0;t<6&&order.every((o,i)=>o===i);t++)order=shuffle(order);
+  stage('<div class="card"><div class="tag">🧩 按順序點出句子</div><div class="built" id="built" lang="en"></div><div class="zh" id="zh" lang="zh-Hant"></div></div><div class="bank" id="bank"></div>');
+  const showZh=()=>{zhOn=true;$("#zh").innerHTML=esc(it.zs);};
+  if(zhOn)showZh();
+  const bank=$("#bank"),built=$("#built");
+  order.forEach(oi=>{
+    const b=document.createElement("button");b.className="chunk";b.textContent=ch[oi];b.lang="en";
+    b.onclick=()=>{
+      if(finished||b.classList.contains("used"))return;
+      if(ch[oi]===ch[step]){
+        sfx.tick();b.classList.add("used");
+        const s=document.createElement("span");s.textContent=ch[oi];built.appendChild(s);
+        step++;stepMiss=0;[...bank.children].forEach(x=>x.classList.remove("hint"));
+        if(step>=ch.length){
+          finished=true;showZh();
+          const ok=mistakes<=2;
+          finishQ(ok,mistakes===0&&!assist&&!zhUsed);
+          if(ok){showNext(tok);speak(it.text,.9,()=>{if(sid===tok)advance(tok,350);});}
+          else{showNext(tok);speak(it.text,.9);}
+        }
+      }else{
+        mistakes++;stepMiss++;b.classList.remove("no");void b.offsetWidth;b.classList.add("no");sfx.no();
+        if(stepMiss>=2){assist=true;[...bank.children].forEach(x=>{if(!x.classList.contains("used")&&x.textContent===ch[step])x.classList.add("hint");});}
+      }
+    };
+    bank.appendChild(b);
+  });
+  if((P.pts[it.id]||0)<4)speak(it.text,.9);
+  const foot=[{t:"🔊",fn:()=>speak(it.text,.9)},{t:"🐢",fn:()=>speak(it.text,.6)}];
+  if(mode==="btn")foot.push(zhBtn(()=>{zhUsed=true;showZh();}));
+  setFoot(foot);
+}
+
+/* ---------- 第 3 關:例句選擇(直接朗讀整句,答案不遮) ---------- */
+function renderL3(it,tok){
+  let zhUsed=false,done=false;
+  const opts=shuffle([it.ans].concat(shuffle(it.d).slice(0,2)));
+  stage('<div class="card"><div class="tag">🎯 聽一聽，選出正確的字</div><div class="sent" lang="en">'+esc(it.pre)+'<span class="blank" id="bl">&nbsp;</span>'+esc(it.post)+'</div><div class="zh" id="zh" lang="zh-Hant"></div></div><div class="opts" id="opts"></div>');
+  const showZh=()=>{$("#zh").innerHTML="<b>"+esc(it.zw)+"</b>　"+esc(it.zs);};
+  const box=$("#opts");
+  opts.forEach(o=>{
+    const b=document.createElement("button");b.className="opt";b.textContent=o;b.lang="en";
+    b.onclick=()=>{
+      if(done)return;done=true;
+      [...box.children].forEach(x=>{x.disabled=true;if(x.textContent===it.ans)x.classList.add("ok");});
+      const bl=$("#bl");bl.textContent=it.ans;bl.classList.add("fill");
+      if(o===it.ans){finishQ(true,!zhUsed);advance(tok,1300);}
+      else{b.classList.add("no");showZh();finishQ(false,false);showNext(tok);speak(it.text,.9);}
+    };
+    box.appendChild(b);
+  });
+  speak(it.text,.9);
+  setFoot([{t:"🔊",fn:()=>speak(it.text,.9)},{t:"🐢",fn:()=>speak(it.text,.6)},zhBtn(()=>{zhUsed=true;showZh();})]);
+}
+
+/* ---------- 一關結束 / 成績卡 ---------- */
+function timeMsg(run){
+  const act=fmtDur(run.ms);
+  if(run.guess){
+    const diff=run.guess*60000-run.ms;
+    if(diff>0)return "你猜 "+run.guess+" 分鐘，只花了 "+act+"，比想像的少 "+fmtDur(diff)+"！";
+    return "你猜 "+run.guess+" 分鐘，實際用了 "+act+"。每一分鐘的專心都有收穫！";
+  }
+  return "這一關只花了 "+act+"，比想像中更快完成！";
+}
+function cardHTML(run){
+  const today=dstr(),tr=P.runs.filter(r=>r.d===today);
+  const tOk=tr.reduce((a,r)=>a+r.ok,0),tN=tr.reduce((a,r)=>a+r.n,0),tMs=tr.reduce((a,r)=>a+r.ms,0);
+  const stamp=run?run.t:Date.now();
+  const code=mkCode([P.cls,P.seat,P.name,dstr(stamp),P.earned,P.ok,Math.round(P.totalMs/1000)].join("|"));
+  const row=(a,b)=>'<div class="rr"><span>'+a+'</span><b>'+b+'</b></div>';
+  return '<div class="rcard"><h3>📋 練習紀錄卡</h3><div class="rows">'+
+    row("班級",esc(P.cls))+row("座號",esc(P.seat))+row("姓名",esc(P.name))+row("時間",tstr(stamp))+
+    (run?'<div class="sec-t">這一關</div>'+row(LV[run.lvl].name,run.ok+" / "+run.n+" 題")+row("用時",fmtDur(run.ms))+row("本關金幣","🪙 +"+run.coins):'')+
+    '<div class="sec-t">今天</div>'+row("練習次數",tr.length+" 次")+row("答對",tOk+" / "+tN+" 題")+row("練習時間",fmtDur(tMs))+
+    '<div class="sec-t">累計</div>'+row("總練習時間",fmtDur(P.totalMs))+row("金幣","🪙 "+P.coins)+row("圖鑑","📖 "+P.unlocked.length+" / "+COMPS.length)+
+    row("驗證碼",'<span class="code">'+code+'</span>')+'</div></div>';
+}
+function endLevel(){
+  G.running=false;sfx.fin();try{speechSynthesis.cancel();}catch(e){}
+  const n=G.ok,stars=n>=9?3:n>=7?2:1;
+  const run={t:Date.now(),d:dstr(),lvl:G.lvl,ok:n,n:10,ms:G.ms,coins:G.coins,guess:G.guess};
+  P.runs.push(run);if(P.runs.length>120)P.runs.shift();
+  P.best[G.lvl]=Math.max(P.best[G.lvl]||0,stars);saveDb();
+  burst(["🎉","⭐","✨","🪙","🎊"],26);
+  const lv=G.lvl,canOpen=P.coins>=UNLOCK_COST;
+  const msg=n>=9?"太強了！這關幾乎全對！":n>=7?"很棒！再練一次就更穩了！":n>=4?"有進步！錯的地方就是你變強的機會。":"勇敢練習就是成功的第一步，再試一次吧！";
+  const weak=G.wrong.slice(0,3).map(w=>'<div><span class="en" lang="en">'+(lv===1?esc(w.ans):esc(w.pre)+'<u>'+esc(w.ans)+'</u>'+esc(w.post))+'</span> <span lang="zh-Hant" style="color:var(--sub)">'+esc(w.zw)+'</span></div>').join("");
+  $("#result").innerHTML=
+    '<div class="rtop"><div class="mas happy" id="rmas"></div><h2>第 '+lv+' 關完成！</h2></div>'+
+    '<div class="stars">'+starsOf(stars)+'</div>'+
+    '<div class="tmsg">'+esc(msg)+'<br>'+esc(timeMsg(run))+'</div>'+
+    cardHTML(run)+
+    (weak?'<div class="card weak"><b>下次先看看這幾個：</b>'+weak+'</div>':'')+
+    '<div style="text-align:center;font-size:15px;color:var(--sub)">📸 可以截圖上面的紀錄卡給老師</div>'+
+    (canOpen?'<button class="btn pulse" id="rDex">🔓 你有 '+P.coins+' 枚金幣，去解鎖零件！</button>':'')+
+    (lv<3?'<button class="btn go" id="rNext">下一關：第 '+(lv+1)+' 關 →</button>':'<button class="btn go" id="rNext">🎉 三關全部完成！回首頁</button>')+
+    '<button class="btn sec" id="rAgain">再玩一次這一關</button>'+
+    '<button class="link" id="rHome">回首頁</button>';
+  setMas($("#rmas"),"happy");
+  if($("#rDex"))$("#rDex").onclick=openDex;
+  $("#rNext").onclick=()=>{if(lv<3)startLevel(lv+1);else{renderHome();show("home");}};
+  $("#rAgain").onclick=()=>startLevel(lv);
+  $("#rHome").onclick=()=>{renderHome();show("home");};
+  show("result");$("#result").scrollTop=0;
+}
+function renderReport(){
+  $("#report").innerHTML='<div class="rtop"><h2>📋 我的成績單</h2></div>'+cardHTML(null)+
+   '<div style="text-align:center;font-size:15px;color:var(--sub)">📸 截圖這個畫面給老師。驗證碼只是提醒，請誠實練習喔！</div>'+
+   '<button class="btn sec" id="repBack">← 回首頁</button>';
+  $("#repBack").onclick=()=>{renderHome();show("home");};
+}
+
+/* ---------- 輪機零件圖鑑 ---------- */
+function openDex(){renderDex();show("dex");}
+$("#dback").onclick=()=>{$("#modal").classList.remove("on");renderHome();show("home");};
+function renderDex(){
+  $("#dcount").textContent=P.unlocked.length+"/"+COMPS.length;
+  $("#dcoin").textContent=P.coins;
+  $("#dhint").textContent="答對一題 +1 🪙，解開一個零件要 "+UNLOCK_COST+" 🪙。點一下神祕零件試試看！";
+  $("#dgrid").innerHTML=COMPS.map((c,i)=>{
+    const open=P.unlocked.indexOf(c.id)>=0;
+    return '<button class="dc '+(open?'open':'lock')+'" data-i="'+i+'"><span class="no">#'+pad(i+1)+'</span><div class="ic">'+c.svg+'</div>'+
+      (open?'<b lang="en">'+esc(c.en)+'</b><small lang="zh-Hant">'+esc(c.zh)+'</small>':'<b>? ? ?</b><small>&nbsp;</small><span class="q">?</span>')+'</button>';
+  }).join("");
+  $("#dgrid").querySelectorAll(".dc").forEach(b=>b.onclick=()=>openComp(+b.dataset.i,b));
+}
+let modalTok=0;
+function closeModal(){modalTok++;$("#modal").classList.remove("on");try{speechSynthesis.cancel();}catch(e){}}
+$("#modal").onclick=e=>{if(e.target.id==="modal")closeModal();};
+function openComp(i,btn){
+  const c=COMPS[i],open=P.unlocked.indexOf(c.id)>=0;
+  if(!open&&P.coins<UNLOCK_COST){
+    sfx.no();if(btn){btn.classList.remove("shake");void btn.offsetWidth;btn.classList.add("shake");}
+    $("#dhint").textContent="還差 "+(UNLOCK_COST-P.coins)+" 枚金幣就能解開，繼續加油！💪";
+    return;
+  }
+  modalTok++;const body=$("#mbody");
+  body.innerHTML='<button class="x" id="mx" aria-label="關閉">✕</button><div class="mic '+(open?'':'sil')+'" id="mic">'+c.svg+(open?'':'<div class="mq" id="mq">?</div>')+'</div><div id="minfo"></div><div id="mact"></div>';
+  $("#mx").onclick=closeModal;
+  const info=$("#minfo"),act=$("#mact");
+  const paintOpen=()=>{
+    info.innerHTML='<h3>'+esc(c.en)+'</h3><div class="zz" lang="zh-Hant">'+esc(c.zh)+'</div><p class="en" lang="en">'+esc(c.de)+'</p><p lang="zh-Hant">'+esc(c.dz)+'</p>';
+    act.innerHTML='<button class="btn" id="mSay">🔊 聽發音</button>';
+    const sb=act.querySelector("#mSay");if(sb)sb.onclick=()=>speak(c.en+". "+c.de,.85);
+  };
+  $("#modal").classList.add("on");
+  if(open){paintOpen();return;}
+  info.innerHTML='<h3>? ? ?</h3><p lang="zh-Hant">神祕零件 #'+pad(i+1)+'<br>用 '+UNLOCK_COST+' 枚金幣解開它！</p>';
+  act.innerHTML='<button class="btn go" id="mGo">🪙 '+UNLOCK_COST+'　解開！</button><button class="btn sec" id="mNo">再想想</button>';
+  $("#mNo").onclick=closeModal;
+  $("#mGo").onclick=()=>{
+    if(P.coins<UNLOCK_COST)return;
+    P.coins-=UNLOCK_COST;P.unlocked.push(c.id);saveDb();
+    sfx.unlock();burst(["✨","⭐","🎉","🪙","🔓"],28);
+    const mic=$("#mic");mic.classList.remove("sil");mic.classList.add("pop");const q=$("#mq");if(q)q.style.opacity=0;
+    const mt=++modalTok;
+    setTimeout(()=>{if(mt!==modalTok||!$("#modal").classList.contains("on"))return;paintOpen();speak(c.en,.8,()=>{if(mt===modalTok)speak(c.de,.85);});},500);
+    renderDex();
+  };
+}
+
+/* ---------- 啟動 ---------- */
+if(db.last&&db.profiles[db.last]){P=db.profiles[db.last];renderHome();show("home");}
+else show("reg");
+window.__t={ITEMS:ITEMS,WORDS:WORDS,COMPS:COMPS,G:()=>G,P:()=>P,UNLOCK_COST:UNLOCK_COST};
+})();
+</script>
+</body>
+</html>
